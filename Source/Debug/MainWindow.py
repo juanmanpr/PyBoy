@@ -4,7 +4,7 @@
 # License: See LICENSE file
 # GitHub: https://github.com/Baekalfen/PyBoy
 #
-import GenericScreen
+import Debug.GenericScreen as GenericScreen
 import curses
 
 class MainWindow(GenericScreen.GenericScreen):

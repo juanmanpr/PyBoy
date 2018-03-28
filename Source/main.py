@@ -14,21 +14,22 @@ import sys
 import numpy as np
 import platform
 from PyBoy.Logger import logger
+import argparse
 
 if platform.system() != "Windows":
     from Debug import Debug
 from PyBoy import PyBoy
 
 
-def getWindow():
-    if len(sys.argv) < 2:
+def getWindow(s):
+    if not s:
         from PyBoy.GameWindow import SdlGameWindow as Window
-    elif sys.argv[1] == "SDL2":
+    elif s == "sdl2":
         from PyBoy.GameWindow import SdlGameWindow as Window
-    elif sys.argv[1] == "dummy":
+    elif s == "dummy":
         from PyBoy.GameWindow import DummyGameWindow as Window
     else:
-        print "Invalid arguments!"
+        print("Invalid arguments!")
         exit(1)
 
     return Window
@@ -40,7 +41,7 @@ def getROM(ROMdir):
         ".gb") or f.lower().endswith(".gbc"), os.listdir(ROMdir))
     for i, f in enumerate(found_files):
         print ("%s\t%s" % (i + 1, f))
-    filename = raw_input("Write the name or number of the ROM file:\n")
+    filename = input("Write the name or number of the ROM file:\n")
 
     try:
         filename = ROMdir + found_files[int(filename) - 1]
@@ -51,33 +52,26 @@ def getROM(ROMdir):
 
 
 if __name__ == "__main__":
-    # Automatically bump to '-OO' optimizations
-    if __debug__:
-        os.execl(sys.executable, sys.executable, '-OO', *sys.argv)
-
-    bootROM = "ROMs/DMG_ROM.bin"
+    parser = argparse.ArgumentParser(description='Gameboy emulator.')
+    parser.add_argument('--game_name', type=str, help='Game filename (without ROMs)', default='Tetris.gb')
+    parser.add_argument('--window', type=str, help='Game window type', default='sdl2')
+    args = parser.parse_args()
+    
+    bootROM = None
     ROMdir = "ROMs/"
     scale = 1
-    debug = "debug" in sys.argv and platform.system() != "Windows"
 
     # Verify directories
-    if not bootROM is None and not os.path.exists(bootROM):
-        print ("Boot-ROM not found. Please copy the Boot-ROM to '%s'. Using replacement in the meanwhile..." % bootROM)
-        bootROM = None
-
-    if not os.path.exists(ROMdir) and len(sys.argv) < 2:
+    if not os.path.exists(ROMdir):
         print ("ROM folder not found. Please copy the Game-ROM to '%s'" % ROMdir)
         exit()
 
-    try:
-        # Check if the ROM is given through argv
-        if len(sys.argv) > 2: # First arg is SDL2/PyGame
-            filename = sys.argv[2]
-        else:
-            filename = getROM(ROMdir)
+    filename = os.path.join(ROMdir, args.game_name)
+    print(filename)
 
+    try:
         # Start PyBoy and run loop
-        pyboy = PyBoy((getWindow())(scale=scale), filename, bootROM)
+        pyboy = PyBoy((getWindow(args.window))(scale=scale), filename, bootROM)
         while not pyboy.tick():
             pass
         pyboy.stop()

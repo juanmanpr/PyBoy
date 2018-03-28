@@ -5,8 +5,8 @@
 # GitHub: https://github.com/Baekalfen/PyBoy
 #
 
-import CoreDump
-from RAM import allocateRAM, VIDEO_RAM, OBJECT_ATTRIBUTE_MEMORY
+import PyBoy.CoreDump
+from PyBoy.RAM import allocateRAM, VIDEO_RAM, OBJECT_ATTRIBUTE_MEMORY
 import numpy
 
 LCDC, STAT, SCY, SCX, LY, LYC, DMA, BGPalette, OBP0, OBP1, WY, WX = range(0xFF40, 0xFF4C)
@@ -69,19 +69,19 @@ class LCD():
     def refreshTileDataAdaptive(self):
         if self.clearCache:
             self.tilesChanged.clear()
-            for x in xrange(0x8000,0x9800,16):
+            for x in range(0x8000,0x9800,16):
 
                 self.tilesChanged.add(x)
             self.clearCache = False
 
         for t in self.tilesChanged:
-            for k in xrange(0, 16 ,2): #2 bytes for each line
+            for k in range(0, 16 ,2): #2 bytes for each line
                 byte1 = self.mb[t+k]
                 byte2 = self.mb[t+k+1]
 
-                for pixelOnLine in xrange(7,-1,-1):
-                    y = k/2
-                    x = (t - 0x8000)/2 + 7-pixelOnLine
+                for pixelOnLine in range(7,-1,-1):
+                    y = int(k/2)
+                    x = int((t - 0x8000)/2) + 7-pixelOnLine
 
                     colorCode = getColorCode(byte1, byte2, pixelOnLine)
 
@@ -106,7 +106,7 @@ class PaletteRegister():
             return
 
         self.value = value
-        self.lookup = [(value >> x) & 0b11 for x in xrange(0,8,2)]
+        self.lookup = [(value >> x) & 0b11 for x in range(0,8,2)]
         self.lcd.clearCache = True
 
     def getColor(self, i):

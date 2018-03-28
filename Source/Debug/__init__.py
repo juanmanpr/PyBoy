@@ -9,9 +9,9 @@ import curses
 import logging
 import PyBoy.Logger
 from PyBoy.Logger import logger
-from MainWindow import MainWindow
-from Pad import Pad
-from UIPads import ProgramPad, ConsolePad, RegistersPad, FlagPad
+from Debug.MainWindow import MainWindow
+from Debug.Pad import Pad
+from Debug.UIPads import ProgramPad, ConsolePad, RegistersPad, FlagPad
 from PyBoy.opcodeToName import CPU_COMMANDS, CPU_COMMANDS_EXT
 
 class Debug():

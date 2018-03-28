@@ -16,7 +16,7 @@ from .. import CoreDump
 from ..MathUint8 import getSignedInt8
 from ..WindowEvent import WindowEvent
 from ..LCD import colorPalette, alphaMask
-from FrameBuffer import SimpleFrameBuffer, ScaledFrameBuffer
+from PyBoy.GameWindow.FrameBuffer import SimpleFrameBuffer, ScaledFrameBuffer
 from ..GameWindow import AbstractGameWindow
 
 from ..Logger import logger
@@ -89,7 +89,7 @@ class SdlGameWindow(AbstractGameWindow):
         self._window.show()
 
         # Only used for VSYNC
-        self.win = sdl2.SDL_CreateWindow("", 0,0,0,0, 0) # Hack doesn't work, if hidden # sdl2.SDL_WINDOW_HIDDEN)
+        self.win = sdl2.SDL_CreateWindow(b'', 0,0,0,0, 0) # Hack doesn't work, if hidden # sdl2.SDL_WINDOW_HIDDEN)
         self.renderer = sdl2.SDL_CreateRenderer(self.win, -1, sdl2.SDL_RENDERER_PRESENTVSYNC)
 
         self.scanlineParameters = np.ndarray(shape=(gameboyResolution[0],4), dtype='uint8')
@@ -99,7 +99,6 @@ class SdlGameWindow(AbstractGameWindow):
 
     def makeWindowAndGetBuffer(self, width, height, pos_x, pos_y, window_name):
         sdl2.ext.Window.DEFAULTPOS = (pos_x, pos_y)
-
         window = sdl2.ext.Window(window_name, size=(width, height))
         windowSurface = window.get_surface()
         windowBuffer = pixels2dWithoutWarning(windowSurface)
@@ -124,7 +123,7 @@ class SdlGameWindow(AbstractGameWindow):
         # Tile Data
         tiles = 384
         self.tileDataWidth = 16*8 # Change the 16 to whatever wide you want the tile window
-        self.tileDataHeight = ((tiles*8) / self.tileDataWidth)*8
+        self.tileDataHeight = int((tiles*8) / self.tileDataWidth)*8
 
         self.tileDataWindow, self.tileDataWindowSurface, self.tileDataBuffer = \
                 self.makeWindowAndGetBuffer(self.tileDataWidth, self.tileDataHeight, windowOffset, 0, "Tile Data")
@@ -197,14 +196,14 @@ class SdlGameWindow(AbstractGameWindow):
         backgroundViewAddress = 0x1800 if lcd.LCDC.backgroundMapSelect == 0 else 0x1C00
         windowViewAddress = 0x1800 if lcd.LCDC.windowMapSelect == 0 else 0x1C00
 
-        for y in xrange(gameboyResolution[1]):
+        for y in range(gameboyResolution[1]):
             xx, yy, wx, wy = self.scanlineParameters[y]
             # xx, yy = lcd.getViewPort()
             offset = xx & 0b111 # Used for the half tile at the left side when scrolling
 
-            for x in xrange(gameboyResolution[0]):
+            for x in range(gameboyResolution[0]):
                 if lcd.LCDC.backgroundEnable:
-                    backgroundTileIndex = lcd.VRAM[backgroundViewAddress + (((xx + x)/8)%32 + ((y+yy)/8)*32)%0x400]
+                    backgroundTileIndex = lcd.VRAM[int(backgroundViewAddress + (((xx + x)/8)%32 + ((y+yy)/8)*32)%0x400)]
 
                     if lcd.LCDC.tileSelect == 0: # If using signed tile indices
                         backgroundTileIndex = getSignedInt8(backgroundTileIndex)+256
@@ -231,7 +230,7 @@ class SdlGameWindow(AbstractGameWindow):
         spriteSize = 16 if lcd.LCDC.spriteSize else 8
         BGPkey = lcd.BGP.getColor(0)
 
-        for n in xrange(0x00,0xA0,4):
+        for n in range(0x00,0xA0,4):
             y = lcd.OAM[n] - 16 #TODO: Simplify reference
             x = lcd.OAM[n+1] - 8
             tileIndex = lcd.OAM[n+2]
@@ -253,10 +252,10 @@ class SdlGameWindow(AbstractGameWindow):
         x1,y1 = fromXY
         x2,y2 = toXY
 
-        for y in xrange(spriteSize):
+        for y in range(spriteSize):
             yy = ((spriteSize-1)-y) if yFlip else y
             yy %= 8
-            for x in xrange(8):
+            for x in range(8):
                 xx = x1 # Base coordinate
                 xx += ((7-x) if xFlip else x) # Reverse order, if sprite is x-flipped
 
@@ -309,7 +308,7 @@ class SdlGameWindow(AbstractGameWindow):
         winHorTileView1Limit = 32
         winVerTileView1Limit = 32
 
-        for n in xrange(0x1800,0x1C00):
+        for n in range(0x1800,0x1C00):
             tileIndex = lcd.VRAM[n] #TODO: Simplify this reference -- and reoccurences
 
             # Check the tile source and add offset
@@ -318,10 +317,10 @@ class SdlGameWindow(AbstractGameWindow):
             if (lcd.LCDC.value >> 4) & 1 == 0: #TODO: use correct flag
                 tileIndex = 256 + getSignedInt8(tileIndex)
 
-            tileColumn = (n-0x1800)%winHorTileView1Limit # Horizontal tile number wrapping on 16
-            tileRow = (n-0x1800)/winVerTileView1Limit # Vertical time number based on tileColumn
+            tileColumn = int((n-0x1800)%winHorTileView1Limit) # Horizontal tile number wrapping on 16
+            tileRow = int((n-0x1800)/winVerTileView1Limit) # Vertical time number based on tileColumn
 
-            fromXY = ((tileIndex*8)%self.tileDataWidth, ((tileIndex*8)/self.tileDataWidth)*8)
+            fromXY = (int((tileIndex*8)%self.tileDataWidth), int((tileIndex*8)/self.tileDataWidth)*8)
             toXY = (tileColumn*8, tileRow*8)
 
             self.copyTile(fromXY, toXY, self.tileDataBuffer, self.tileView1Buffer)
@@ -333,7 +332,7 @@ class SdlGameWindow(AbstractGameWindow):
         winHorTileView2Limit = 32
         winVerTileView2Limit = 32
 
-        for n in xrange(0x1C00,0x2000):
+        for n in range(0x1C00,0x2000):
             tileIndex = lcd.VRAM[n]
 
             # Check the tile source and add offset
@@ -342,17 +341,17 @@ class SdlGameWindow(AbstractGameWindow):
             if (lcd.LCDC.value >> 4) & 1 == 0:
                 tileIndex = 256 + getSignedInt8(tileIndex)
 
-            tileColumn = (n-0x1C00)%winHorTileView2Limit # Horizontal tile number wrapping on 16
-            tileRow = (n-0x1C00)/winVerTileView2Limit # Vertical time number based on tileColumn
+            tileColumn = int((n-0x1C00)%winHorTileView2Limit) # Horizontal tile number wrapping on 16
+            tileRow = int((n-0x1C00)/winVerTileView2Limit) # Vertical time number based on tileColumn
 
-            fromXY = ((tileIndex*8)%self.tileDataWidth, ((tileIndex*8)/self.tileDataWidth)*8)
+            fromXY = (int((tileIndex*8)%self.tileDataWidth), int((tileIndex*8)/self.tileDataWidth)*8)
             toXY = (tileColumn*8, tileRow*8)
 
             self.copyTile(fromXY, toXY, self.tileDataBuffer, self.tileView2Buffer)
 
 
     def drawTileCacheView(self, lcd):
-        for n in xrange(self.tileDataHeight/8):
+        for n in range(int(self.tileDataHeight/8)):
             self.tileDataBuffer[0:self.tileDataWidth,n*8:(n+1)*8] = lcd.tileCache[n*self.tileDataWidth:(n+1)*self.tileDataWidth,0:8]
 
     def drawTileView1ScreenPort(self, lcd):
@@ -384,22 +383,23 @@ class SdlGameWindow(AbstractGameWindow):
 
 
     def drawHorLine(self,xx,yy,length,screen,color = 0):
-        for x in xrange(length):
+        for x in range(length):
             screen[(xx+x)%0xFF,yy&0xFF] = color
 
     def drawVerLine(self,xx,yy,length,screen,color = 0):
-        for y in xrange(length):
+        for y in range(length):
             screen[xx&0xFF,(yy+y)&0xFF] = color
 
 
     def refreshSpriteView(self, lcd):
         self.spriteBuffer.fill(0x00ABC4FF)
-        for n in xrange(0x00,0xA0,4):
+        for n in range(0x00,0xA0,4):
             tileIndex = lcd.OAM[n+2] # TODO: Simplify this reference
             attributes = lcd.OAM[n+3]
             fromXY = (tileIndex * 8, 0)
 
             i = n*2
-            self.copyTile(fromXY, (i%self.spriteWidth, (i/self.spriteWidth)*16), lcd.spriteCacheOBP0, self.spriteBuffer)
+            self.copyTile(fromXY, (int(i%self.spriteWidth), int(i/self.spriteWidth)*16), 
+                          lcd.spriteCacheOBP0, self.spriteBuffer)
             if lcd.LCDC.spriteSize:
                 self.copyTile((tileIndex * 8+8, 0), (i%self.spriteWidth, (i/self.spriteWidth)*16 + 8), lcd.spriteCacheOBP0, self.spriteBuffer)

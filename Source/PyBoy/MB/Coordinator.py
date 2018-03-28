@@ -67,7 +67,7 @@ def tickFrame(self):
 
         # TODO: the 19, 41 and 49 ticks should correct for longer instructions
         # Iterate the 144 lines on screen
-        for y in xrange(144):
+        for y in range(144):
             self.checkLYC(y)
 
             # Mode 2
@@ -88,7 +88,7 @@ def tickFrame(self):
         self.MainWindow.renderScreen(self.lcd) # Actually render screen from scanline parameters
 
         # Wait for next frame
-        for y in xrange(144,154):
+        for y in range(144,154):
             self.checkLYC(y)
 
             # Mode 1
@@ -101,7 +101,7 @@ def tickFrame(self):
         self.setSTATMode(0)
         self[LY] = 0
 
-        for y in xrange(154):
+        for y in range(154):
             self.calculateCycles(456)
 
 

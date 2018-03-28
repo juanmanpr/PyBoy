@@ -5,5 +5,5 @@
 # GitHub: https://github.com/Baekalfen/PyBoy
 #
 
-from Sprite import Sprite
-from TileView import TileView
+from PyBoy.BotSupport.Sprite import Sprite
+from PyBoy.BotSupport.TileView import TileView

@@ -4,12 +4,12 @@
 # License: See LICENSE file
 # GitHub: https://github.com/Baekalfen/PyBoy
 #
-import GenericScreen
+import Debug.GenericScreen as GenericScreen
 import curses
 
 class Window(GenericScreen.GenericScreen):
-    def __init__(self, (win_line, win_column), (height, width)):
-        self._screen = curses.newwin(height,width,win_line,win_column)
+    def __init__(self, line_column, sz):
+        self._screen = curses.newwin(sz[0],sz[1],line_column[0],line_column[1])
 
 
 

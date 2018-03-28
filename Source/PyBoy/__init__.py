@@ -9,12 +9,12 @@
 import sys
 import time
 
-from MB import Motherboard
-from WindowEvent import WindowEvent
-from Logger import logger, addConsoleHandler
-import BotSupport
-import Logger
-from opcodeToName import CPU_COMMANDS, CPU_COMMANDS_EXT
+from PyBoy.MB import Motherboard
+from PyBoy.WindowEvent import WindowEvent
+from PyBoy.Logger import logger, addConsoleHandler
+import PyBoy.BotSupport
+import PyBoy.Logger
+from PyBoy.opcodeToName import CPU_COMMANDS, CPU_COMMANDS_EXT
 
 
 SPF = 1/60. # inverse FPS (frame-per-second)
@@ -112,7 +112,7 @@ class PyBoy():
             argMax = np.argsort(self.mb.cpu.hitRate)
             for n in argMax[::-1]:
                 if self.mb.cpu.hitRate[n] != 0:
-                    print "%3x %16s %s" % (n, CPU_COMMANDS[n] if n<0x100 else CPU_COMMANDS_EXT[n-0x100], self.mb.cpu.hitRate[n])
+                    print("%3x %16s %s" % (n, CPU_COMMANDS[n] if n<0x100 else CPU_COMMANDS_EXT[n-0x100], self.mb.cpu.hitRate[n]))
 
 
     ###########################

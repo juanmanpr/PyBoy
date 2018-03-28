@@ -4,17 +4,17 @@
 # License: See LICENSE file
 # GitHub: https://github.com/Baekalfen/PyBoy
 #
-import GenericScreen
+import Debug.GenericScreen as GenericScreen
 import curses
 
 class Pad(GenericScreen.GenericScreen):
-    def __init__(self, (win_line, win_column), (height, width), cell_data=None, cell_widths=None):
-        self.win_line = win_line
-        self.win_column = win_column
+    def __init__(self, win, sz, cell_data=None, cell_widths=None):
+        self.win_line = win[0]
+        self.win_column = win[1]
         self.scroll_line = 0
         self.scroll_column = 0
-        self.height = height
-        self.width = width
+        self.height = sz[0]
+        self.width = sz[1]
         self._screen = curses.newpad(height, width)
         self.cell_data = None
         self.cell_widths = None

@@ -9,12 +9,12 @@ from .. import CoreDump
 import os
 import struct
 
-from GenericMBC import GenericMBC
-from GenericMBC import ROM_only
-from MBC1 import MBC1
-from MBC2 import MBC2
-from MBC3 import MBC3
-from MBC5 import MBC5
+from PyBoy.Cartridge.GenericMBC import GenericMBC
+from PyBoy.Cartridge.GenericMBC import ROM_only
+from PyBoy.Cartridge.MBC1 import MBC1
+from PyBoy.Cartridge.MBC2 import MBC2
+from PyBoy.Cartridge.MBC3 import MBC3
+from PyBoy.Cartridge.MBC5 import MBC5
 
 from ..Logger import logger
 
@@ -49,10 +49,24 @@ def loadROMfile(filename):
         ROMData = ROMFile.read()
 
         bankSize = (16 * 1024)
-        ROMBanks = [[0] * bankSize for n in xrange(len(ROMData) / bankSize)]
+        ROMBanks = [[0] * bankSize for n in range(int(len(ROMData) / bankSize))]
 
         for i, byte in enumerate(ROMData):
-            ROMBanks[i / bankSize][i % bankSize] = ord(byte)
+            ROMBanks[int(i / bankSize)][i % bankSize] = ord(byte)
+
+    return ROMBanks
+
+def loadROMfileP3(filename):#TODO CHECK IF ARE THE SAME
+    with open(filename, 'rb') as ROMFile:
+        ROMData = ROMFile.read()
+        characters = [n for n in ROMData]
+
+        bankSize = (16 * 1024)
+        ROMBanks = [[0] * bankSize for n in range(int(len(characters) / bankSize))]
+
+
+        for i, byte in enumerate(characters):
+            ROMBanks[int(i / bankSize)][i % bankSize] = byte
 
     return ROMBanks
 

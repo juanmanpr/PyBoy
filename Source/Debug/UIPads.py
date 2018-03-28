@@ -4,8 +4,8 @@
 # License: See LICENSE file
 # GitHub: https://github.com/Baekalfen/PyBoy
 #
-from Pad import Pad
-from Window import Window
+from Debug.Pad import Pad
+from Debug.Window import Window
 import curses
 
 class ProgramPad(Pad):
@@ -24,10 +24,10 @@ class RegistersPad(Pad):
         super(RegistersPad, self).__init__(placement, size)
 
 class ConsolePad(Window):
-    def __init__(self, placement, (line,column)):
-        super(ConsolePad, self).__init__(placement, (line,column))
-        self.max_line = line
-        self.max_column = column
+    def __init__(self, placement, line_column):
+        super(ConsolePad, self).__init__(placement, line_column)
+        self.max_line = line_column=[0]
+        self.max_column = line_column[1]
         self.line = 0
         self._screen.setscrreg(0,line-1)
         # assert self._screen.idlok(1), "Couldn't enable scrolling"

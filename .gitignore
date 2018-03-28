@@ -82,3 +82,13 @@ ROMs/
 diffDump.txt
 Core_Dump_*
 *.state
+
+
+#NEW
+bin/
+include
+lib-python/
+lib_pypy/
+pip-selfcheck.json
+site-packages/
+
